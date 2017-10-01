@@ -1,0 +1,5 @@
+# Ignore CMake Build folder
+/_build*
+
+# Ignore MacOS files
+.DS_Store
