@@ -2,7 +2,11 @@
 
 project(liblua)
 
-set(LUA_SRC_DIR lua-5.3.4/src)
+set(LUA_VERSIONMAJ 5)
+set(LUA_VERSIONMIN 3)
+set(LUA_VERSIONSUB 4)
+
+set(LUA_SRC_DIR lua-${LUA_VERSIONMAJ}.${LUA_VERSIONMIN}.${LUA_VERSIONSUB}/src)
 
 set(LUA_SOURCES_CORE
 	${LUA_SRC_DIR}/lapi.c
@@ -70,13 +74,26 @@ set(LUA_HEADERS
 	${LUA_SRC_DIR}/lzio.h
 )
 
+set(LUA_RESOURCES
+)
+
+# Generate win32 resource file
+if(WIN32)
+	configure_file(
+		"${CMAKE_CURRENT_SOURCE_DIR}/resources.rc.in"
+		"${CMAKE_CURRENT_BINARY_DIR}/resources.rc"
+	)
+	list(APPEND LUA_RESOURCES "${CMAKE_CURRENT_BINARY_DIR}/resources.rc")
+endif()
+
 # Group sources
 source_group("Header Files" FILES ${LUA_HEADERS})
 source_group("Source Files\\Core" FILES ${LUA_SOURCES_CORE})
 source_group("Source Files\\Libs" FILES ${LUA_SOURCES_LIB})
+source_group("Resources" FILES ${LUA_RESOURCES})
 
 # Define target
-add_library(liblua SHARED ${LUA_SOURCES_CORE} ${LUA_SOURCES_LIB} ${LUA_HEADERS})
+add_library(liblua SHARED ${LUA_SOURCES_CORE} ${LUA_SOURCES_LIB} ${LUA_HEADERS} ${LUA_RESOURCES})
 target_compile_options(liblua PUBLIC -DLUA_BUILD_AS_DLL)
 target_include_directories(liblua PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/${LUA_SRC_DIR}>)
 install(TARGETS liblua RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)

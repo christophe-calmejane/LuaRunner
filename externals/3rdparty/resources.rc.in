@@ -1,0 +1,25 @@
+#undef  WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION ${LUA_VERSIONMAJ},${LUA_VERSIONMIN},${LUA_VERSIONSUB},0
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4"
+    BEGIN
+			VALUE "CompanyName", "PUC-Rio\0"
+			VALUE "FileDescription", "Lua VM Shared Library\0"
+			VALUE "FileVersion", "${LUA_VERSIONMAJ}.${LUA_VERSIONMIN}.${LUA_VERSIONSUB}.0\0"
+			VALUE "ProductName", "Lua\0"
+			VALUE "ProductVersion", "${LUA_VERSIONMAJ}.${LUA_VERSIONMIN}.${LUA_VERSIONSUB}.0\0"
+			VALUE "LegalCopyright", "Copyright (c) 1994-2017 Lua.org, PUC-Rio\0"
+    END
+  END
+
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 65001
+  END
+END
