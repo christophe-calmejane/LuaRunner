@@ -17,7 +17,7 @@
 * along with LuaRunner.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "execute.hpp"
+#include "luaRunner/execute.hpp"
 #include "pluginManager.hpp"
 #include "builtin.hpp"
 #include <lua.hpp>

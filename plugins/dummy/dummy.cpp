@@ -17,7 +17,7 @@
 * along with LuaRunner.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <luaRunnerPlugin.hpp>
+#include <luaRunner/plugin.hpp>
 #include <lua.hpp>
 #include <chrono>
 #include <thread>

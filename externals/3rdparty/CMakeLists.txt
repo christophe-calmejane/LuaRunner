@@ -46,9 +46,16 @@ set(LUA_SOURCES_LIB
 	${LUA_SRC_DIR}/lutf8lib.c
 )
 
+set(LUA_PUBLIC_HEADERS
+	${LUA_SRC_DIR}/lua.h
+	${LUA_SRC_DIR}/lua.hpp
+	${LUA_SRC_DIR}/luaconf.h
+	${LUA_SRC_DIR}/lualib.h
+	${LUA_SRC_DIR}/lauxlib.h
+)
+
 set(LUA_HEADERS
 	${LUA_SRC_DIR}/lapi.h
-	${LUA_SRC_DIR}/lauxlib.h
 	${LUA_SRC_DIR}/lcode.h
 	${LUA_SRC_DIR}/lctype.h
 	${LUA_SRC_DIR}/ldebug.h
@@ -66,9 +73,6 @@ set(LUA_HEADERS
 	${LUA_SRC_DIR}/lstring.h
 	${LUA_SRC_DIR}/ltable.h
 	${LUA_SRC_DIR}/ltm.h
-	${LUA_SRC_DIR}/lua.h
-	${LUA_SRC_DIR}/luaconf.h
-	${LUA_SRC_DIR}/lualib.h
 	${LUA_SRC_DIR}/lundump.h
 	${LUA_SRC_DIR}/lvm.h
 	${LUA_SRC_DIR}/lzio.h
@@ -88,12 +92,14 @@ endif()
 
 # Group sources
 source_group("Header Files" FILES ${LUA_HEADERS})
+source_group("Header Files\\Public" FILES ${LUA_PUBLIC_HEADERS})
 source_group("Source Files\\Core" FILES ${LUA_SOURCES_CORE})
 source_group("Source Files\\Libs" FILES ${LUA_SOURCES_LIB})
 source_group("Resources" FILES ${LUA_RESOURCES})
 
 # Define target
-add_library(liblua SHARED ${LUA_SOURCES_CORE} ${LUA_SOURCES_LIB} ${LUA_HEADERS} ${LUA_RESOURCES})
+add_library(liblua SHARED ${LUA_SOURCES_CORE} ${LUA_SOURCES_LIB} ${LUA_HEADERS} ${LUA_PUBLIC_HEADERS} ${LUA_RESOURCES})
 target_compile_options(liblua PUBLIC -DLUA_BUILD_AS_DLL)
 target_include_directories(liblua PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/${LUA_SRC_DIR}>)
 install(TARGETS liblua RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+install(FILES ${LUA_PUBLIC_HEADERS} DESTINATION include/lua)

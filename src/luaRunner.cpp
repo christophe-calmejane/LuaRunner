@@ -22,16 +22,16 @@ luaRunner -p lcomLua.dll lcomTest.lua
 luaRunner -p avdeccLua.dll -p avdeccControllerLua.dll avdeccTest.lua
 */
 
+#include "luaRunner/execute.hpp"
+#include "luaRunner/version.hpp"
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
-#include "config.h"
-#include "execute.hpp"
 
 void printHelp()
 {
-	std::cout << "LuaRunner v" << LUARUNNER_VERSION << " usage:" << std::endl;
+	std::cout << "LuaRunner v" << luaRunner::getVersion() << " usage:" << std::endl;
 	std::cout << "  LuaRunner [Options] <lua script to execute> [lua script parameters]" << std::endl;
 	std::cout << "Options:" << std::endl;
 	std::cout << "  -h -> Display this help and exit" << std::endl;
@@ -61,7 +61,7 @@ int main(int argc, char const* argv[])
 			}
 			else if (arg == "-v")
 			{
-				std::cout << "LuaRunner version v" << LUARUNNER_VERSION << std::endl;
+				std::cout << "LuaRunner version v" << luaRunner::getVersion() << std::endl;
 				exit(1);
 			}
 			else if (arg == "-p")

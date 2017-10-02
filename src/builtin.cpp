@@ -17,11 +17,11 @@
 * along with LuaRunner.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "luaRunner/execute.hpp"
 #include <lua.hpp>
 #include <cassert>
 #include <chrono>
 #include <thread>
-#include "execute.hpp"
 
 namespace luaRunner
 {
