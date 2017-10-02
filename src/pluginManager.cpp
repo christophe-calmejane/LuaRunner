@@ -64,7 +64,7 @@ private:
 	// Private members
 	using LoadedPlugins = std::vector<DL_HANDLE>;
 
-	lua_State* _state{nullptr};
+	lua_State* _state{ nullptr };
 	LoadedPlugins _loadedPlugins{};
 };
 
@@ -86,11 +86,11 @@ Manager::LoadResult ManagerImpl::loadPlugin(std::string const& pluginPath) noexc
 	auto const handle = DL_OPEN(pluginPath.c_str());
 	if (handle == nullptr)
 	{
-		return {false, "TODO: LoadError Error Message"};
+		return { false, "TODO: LoadError Error Message" };
 	}
 
 	InitPluginFunc initFunc = reinterpret_cast<InitPluginFunc>(DL_SYM(handle, "?InitPlugin@@YG_NPAUlua_State@@@Z"));
-	if(initFunc != nullptr)
+	if (initFunc != nullptr)
 	{
 		initFunc(_state);
 	}

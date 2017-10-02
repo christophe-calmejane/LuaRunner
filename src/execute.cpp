@@ -48,7 +48,7 @@ private:
 
 	// Private members
 	lua_State* _state{ nullptr };
-	plugin::Manager::UniquePointer _pluginManager {nullptr};
+	plugin::Manager::UniquePointer _pluginManager{ nullptr };
 };
 
 // Constructor
@@ -78,9 +78,9 @@ Executor::LoadResult ExecutorImpl::loadPlugin(std::string const& pluginPath) noe
 	auto const errorString = std::get<1>(loadResult);
 	if (!result)
 	{
-		return {Result::LoadError, errorString};
+		return { Result::LoadError, errorString };
 	}
-	return {Result::Success, ""};
+	return { Result::Success, "" };
 }
 
 Executor::ExecuteResult ExecutorImpl::executeLuaFileWithParameters(std::string const& luaFilePath, ScriptParameters const& parameters) noexcept

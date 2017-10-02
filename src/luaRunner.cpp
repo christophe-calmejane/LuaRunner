@@ -106,7 +106,7 @@ int main(int argc, char const* argv[])
 		auto const loadResult = executor.loadPlugin(pluginPath);
 		auto const result = std::get<0>(loadResult);
 		auto const errorString = std::get<1>(loadResult);
-		if(!result)
+		if (!result)
 		{
 			std::cout << "Failed to load plugin: " << luaRunner::execute::Executor::resultToString(result) << ": " << errorString << std::endl;
 		}
@@ -114,7 +114,7 @@ int main(int argc, char const* argv[])
 
 	// Execute lua file
 	std::cout << "Executing lua script '" << scriptToExecute << "'" << std::endl;
-	
+
 	auto const executeResult = executor.executeLuaFileWithParameters(scriptToExecute, scriptsParameters);
 	auto const result = std::get<0>(executeResult);
 	auto const errorString = std::get<1>(executeResult);

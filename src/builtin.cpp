@@ -49,15 +49,15 @@ int utils_require(lua_State* luaState)
 {
 	auto const* const pluginPath = luaL_checklstring(luaState, 1, NULL);
 
-	auto& executor {execute::Executor::getInstance()};
+	auto& executor{ execute::Executor::getInstance() };
 	auto const loadResult = executor.loadPlugin(pluginPath);
 	auto const result = std::get<0>(loadResult);
 	auto const errorString = std::get<1>(loadResult);
-	if(!result)
+	if (!result)
 	{
 		luaL_error(luaState, (std::string("Failed to load plugin: ") + luaRunner::execute::Executor::resultToString(result) + ": " + errorString).c_str());
 	}
-	
+
 	return 0; // Return 0 variable
 }
 

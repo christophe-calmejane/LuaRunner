@@ -29,7 +29,7 @@ std::string valueToString(lua_State* luaState, int index)
 {
 	auto const type = lua_type(luaState, index);
 	std::string value;
-	switch(type)
+	switch (type)
 	{
 		case LUA_TNIL:
 			value = "nil";
@@ -41,7 +41,7 @@ std::string valueToString(lua_State* luaState, int index)
 			value = "LightUserData";
 			break;
 		case LUA_TNUMBER:
-			if(lua_isinteger(luaState, index))
+			if (lua_isinteger(luaState, index))
 				value = std::to_string(lua_tointeger(luaState, index)) + " (int) ";
 			else
 				value = std::to_string(lua_tonumber(luaState, index)) + " (double)";
@@ -84,7 +84,7 @@ int dummy_printTable(lua_State* luaState)
 	std::cout << "dummyLib.printTable" << std::endl;
 
 	lua_pushnil(luaState); // First key to enumerate
-	while(lua_next(luaState, 1)) // lua_next pushes 'key' @-2 and 'value' @-1
+	while (lua_next(luaState, 1)) // lua_next pushes 'key' @-2 and 'value' @-1
 	{
 		std::cout << "  Key: " << valueToString(luaState, -2) << " Value: " << valueToString(luaState, -1) << std::endl;
 		lua_pop(luaState, 1); // Remove 'value' from the stack but keep 'key' for next iteration
@@ -132,7 +132,7 @@ int dummy_varParams(lua_State* luaState)
 	auto const argsCount = lua_gettop(luaState);
 	std::cout << "  Got " << argsCount << " parameters:" << std::endl;
 
-	for(auto argNum = 1; argNum <= argsCount; ++argNum)
+	for (auto argNum = 1; argNum <= argsCount; ++argNum)
 	{
 		auto const value = valueToString(luaState, argNum);
 		auto const type = lua_type(luaState, argNum);
