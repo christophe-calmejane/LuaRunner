@@ -99,7 +99,14 @@ source_group("Resources" FILES ${LUA_RESOURCES})
 
 # Define target
 add_library(liblua SHARED ${LUA_SOURCES_CORE} ${LUA_SOURCES_LIB} ${LUA_HEADERS} ${LUA_PUBLIC_HEADERS} ${LUA_RESOURCES})
+# Additional include directories
+target_include_directories(liblua PUBLIC $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/${LUA_SRC_DIR}>)
+# Additional private compile options
 target_compile_options(liblua PUBLIC -DLUA_BUILD_AS_DLL)
-target_include_directories(liblua PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/${LUA_SRC_DIR}>)
-install(TARGETS liblua RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+# Add a postfix in debug mode
+set_target_properties(liblua PROPERTIES DEBUG_POSTFIX "-d")
+# Use cmake folders
+set_target_properties(liblua PROPERTIES FOLDER "Libraries/3rdParty")
+# Setup install rules
+setup_library_install_rules(liblua)
 install(FILES ${LUA_PUBLIC_HEADERS} DESTINATION include/lua)

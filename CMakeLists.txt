@@ -29,6 +29,9 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set(CMAKE_INSTALL_PREFIX "./Install" CACHE PATH "default install path" FORCE)
 endif()
 
+# Include our internal macros
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/internals.cmake)
+
 ############ Define some variables
 
 set(TARGET_ARCH 32)
@@ -39,7 +42,6 @@ set(VS_USE_CLANG FALSE)
 if(MSVC AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 	set(VS_USE_CLANG TRUE)
 endif()
-set(LUARUNNER_ROOT_FOLDER ${CMAKE_CURRENT_SOURCE_DIR})
 
 ############ Add projects
 
