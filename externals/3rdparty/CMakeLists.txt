@@ -100,7 +100,7 @@ source_group("Resources" FILES ${LUA_RESOURCES})
 # Define target
 add_library(liblua SHARED ${LUA_SOURCES_CORE} ${LUA_SOURCES_LIB} ${LUA_HEADERS} ${LUA_PUBLIC_HEADERS} ${LUA_RESOURCES})
 # Additional include directories
-target_include_directories(liblua PUBLIC $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/${LUA_SRC_DIR}>)
+target_include_directories(liblua PUBLIC $<INSTALL_INTERFACE:include/lua> $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/${LUA_SRC_DIR}>)
 # Additional private compile options
 target_compile_options(liblua PUBLIC -DLUA_BUILD_AS_DLL)
 # Add a postfix in debug mode

@@ -125,6 +125,11 @@ function(setup_library_install_rules TARGET_NAME)
 		install(TARGETS ${TARGET_NAME} EXPORT ${TARGET_NAME} RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 		install(EXPORT ${TARGET_NAME} DESTINATION cmake)
 
+	# Interface library install rules
+	elseif(${targetType} STREQUAL "INTERFACE_LIBRARY")
+		install(TARGETS ${TARGET_NAME} EXPORT ${TARGET_NAME})
+		install(EXPORT ${TARGET_NAME} DESTINATION cmake)
+	
 	# Unsupported target type
 	else()
 		message(FATAL_ERROR "Unsupported target type for setup_library_install_rules macro: ${targetType}")

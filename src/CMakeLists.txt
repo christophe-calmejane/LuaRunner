@@ -73,3 +73,10 @@ add_custom_command(
 	COMMENT "Copying liblua to LuaRunner output folder for easy debug"
 	VERBATIM
 )
+
+# Plugin interface target
+add_library(luaRunnerPlugin_interface INTERFACE)
+# Additional include directories
+target_include_directories(luaRunnerPlugin_interface INTERFACE $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${LUARUNNER_ROOT_FOLDER}/include>)
+# Setup install rules
+setup_library_install_rules(luaRunnerPlugin_interface)
