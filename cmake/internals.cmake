@@ -4,39 +4,39 @@
 # Set maximum warning level, and treat warnings as errors
 # Applies on a target, must be called after target has been defined with
 # 'add_library' or 'add_executable'.
-function(set_maximum_warnings TARGET_NAME)
+function(lr_set_maximum_warnings TARGET_NAME)
 	if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR APPLE OR VS_USE_CLANG)
 		target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror -g)
 	elseif(MSVC)
 		# Don't use Wall on MSVC, it prints too many stupid warnings
 		target_compile_options(${TARGET_NAME} PRIVATE /W4 /WX)
 	endif()
-endfunction(set_maximum_warnings)
+endfunction(lr_set_maximum_warnings)
 
 ###############################################################################
 # Set the DEBUG define in debug mode
 # Applies on a target, must be called after target has been defined with
 # 'add_library' or 'add_executable'.
-function(set_debug_define TARGET_NAME)
+function(lr_set_debug_define TARGET_NAME)
 	# Flags to add for DEBUG
 	target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Debug>:-DDEBUG>)
-endfunction(set_debug_define)
+endfunction(lr_set_debug_define)
 
 ###############################################################################
 # Remove VisualStudio useless deprecated warnings (CRT, CRT_SECURE, WINSOCK)
 # Applies on a target, must be called after target has been defined with
 # 'add_library' or 'add_executable'.
-function(remove_vs_deprecated_warnings TARGET_NAME)
+function(lr_remove_vs_deprecated_warnings TARGET_NAME)
 	if(MSVC)
 		target_compile_options(${TARGET_NAME} PRIVATE -D_CRT_SECURE_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS)
 	endif()
-endfunction(remove_vs_deprecated_warnings)
+endfunction(lr_remove_vs_deprecated_warnings)
 
 ###############################################################################
 # Force symbols file generation for build configs (pdb or dSYM)
 # Applies on a target, must be called after target has been defined with
 # 'add_library' or 'add_executable'.
-function(force_symbols_file TARGET_NAME)
+function(lr_force_symbols_file TARGET_NAME)
 	get_target_property(targetType ${TARGET_NAME} TYPE)
 
 	if(MSVC)
@@ -66,18 +66,18 @@ function(force_symbols_file TARGET_NAME)
 			)
 		endif()
 	endif()
-endfunction(force_symbols_file)
+endfunction(lr_force_symbols_file)
 
 ###############################################################################
 # Setup symbols for a target.
-function(setup_symbols TARGET_NAME)
+function(lr_setup_symbols TARGET_NAME)
 	# Force symbols file generation
-	force_symbols_file(${TARGET_NAME})
-endfunction(setup_symbols)
+	lr_force_symbols_file(${TARGET_NAME})
+endfunction(lr_setup_symbols)
 
 ###############################################################################
 # Setup common options for a library target
-function(setup_library_options TARGET_NAME)
+function(lr_setup_library_options TARGET_NAME)
 	if(MSVC)
 		# Set WIN32 version since we want to target WinVista minimum
 		target_compile_options(${TARGET_NAME} PRIVATE -D_WIN32_WINNT=0x0600)
@@ -90,13 +90,13 @@ function(setup_library_options TARGET_NAME)
 	endif()
 
 	# Set full warnings (including treat warnings as error)
-	set_maximum_warnings(${TARGET_NAME})
+	lr_set_maximum_warnings(${TARGET_NAME})
 	
 	# Set the "DEBUG" define in debug compilation mode
-	set_debug_define(${TARGET_NAME})
+	lr_set_debug_define(${TARGET_NAME})
 	
 	# Prevent visual studio deprecated warnings about CRT and Sockets
-	remove_vs_deprecated_warnings(${TARGET_NAME})
+	lr_remove_vs_deprecated_warnings(${TARGET_NAME})
 	
 	# Add a postfix in debug mode
 	set_target_properties(${TARGET_NAME} PROPERTIES DEBUG_POSTFIX "-d")
@@ -105,13 +105,13 @@ function(setup_library_options TARGET_NAME)
 	set_target_properties(${TARGET_NAME} PROPERTIES FOLDER "Libraries")
 
 	# Setup debug symbols
-	setup_symbols(${TARGET_NAME})
+	lr_setup_symbols(${TARGET_NAME})
 
-endfunction(setup_library_options)
+endfunction(lr_setup_library_options)
 
 ###############################################################################
 # Setup common install rules for a library target
-function(setup_library_install_rules TARGET_NAME)
+function(lr_setup_library_install_rules TARGET_NAME)
 	# Get target type for specific options
 	get_target_property(targetType ${TARGET_NAME} TYPE)
 
@@ -135,21 +135,30 @@ function(setup_library_install_rules TARGET_NAME)
 		message(FATAL_ERROR "Unsupported target type for setup_library_install_rules macro: ${targetType}")
 	endif()
 
-endfunction(setup_library_install_rules)
+endfunction(lr_setup_library_install_rules)
 
 ###############################################################################
 # Setup common options for an executable target.
-function(setup_executable_options TARGET_NAME)
+function(lr_setup_executable_options TARGET_NAME)
 	if(MSVC)
 		# Set WIN32 version since we want to target WinVista minimum
 		target_compile_options(${TARGET_NAME} PRIVATE -D_WIN32_WINNT=0x0600)
 	endif()
 
+	# Set full warnings (including treat warnings as error)
+	lr_set_maximum_warnings(${TARGET_NAME})
+	
+	# Set the "DEBUG" define in debug compilation mode
+	lr_set_debug_define(${TARGET_NAME})
+	
+	# Prevent visual studio deprecated warnings about CRT and Sockets
+	lr_remove_vs_deprecated_warnings(${TARGET_NAME})
+	
 	# Add a postfix in debug mode
 	set_target_properties(${TARGET_NAME} PROPERTIES DEBUG_POSTFIX "-d")
 
 	# Setup debug symbols
-	setup_symbols(${TARGET_NAME})
+	lr_setup_symbols(${TARGET_NAME})
 
 	# Set rpath for MacOs
 	if(APPLE)
@@ -169,12 +178,12 @@ function(setup_executable_options TARGET_NAME)
 		set_target_properties(${TARGET_NAME} PROPERTIES INSTALL_RPATH "../lib")
 	endif()
 	
-endfunction(setup_executable_options)
+endfunction(lr_setup_executable_options)
 
 ###############################################################################
 # Copy the runtime part of MODULE_NAME to the output folder of TARGET_NAME for
 # easy debugging from the IDE.
-function(copy_runtime TARGET_NAME MODULE_NAME)
+function(lr_copy_runtime TARGET_NAME MODULE_NAME)
 	# Get module type
 	get_target_property(moduleType ${MODULE_NAME} TYPE)
 	# Module is not a shared library, no need to copy
@@ -199,7 +208,7 @@ function(copy_runtime TARGET_NAME MODULE_NAME)
 		COMMENT "Copying ${MODULE_NAME} shared library to ${TARGET_NAME} output folder for easy debug"
 		VERBATIM
 	)
-endfunction(copy_runtime)
+endfunction(lr_copy_runtime)
 
 ###############################################################################
 # Global variables (must stay at the end of the file)

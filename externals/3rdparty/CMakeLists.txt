@@ -108,5 +108,5 @@ set_target_properties(liblua PROPERTIES DEBUG_POSTFIX "-d")
 # Use cmake folders
 set_target_properties(liblua PROPERTIES FOLDER "Libraries/3rdParty")
 # Setup install rules
-setup_library_install_rules(liblua)
+lr_setup_library_install_rules(liblua)
 install(FILES ${LUA_PUBLIC_HEADERS} DESTINATION include/lua)
