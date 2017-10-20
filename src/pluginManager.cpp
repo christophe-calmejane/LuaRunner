@@ -17,7 +17,7 @@
 * along with LuaRunner.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "luaRunner/Plugin.hpp"
+#include "luaRunner/plugin.hpp"
 #include "pluginManager.hpp"
 #include <cassert>
 #include <vector>

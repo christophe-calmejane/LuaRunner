@@ -101,8 +101,10 @@ source_group("Resources" FILES ${LUA_RESOURCES})
 add_library(liblua SHARED ${LUA_SOURCES_CORE} ${LUA_SOURCES_LIB} ${LUA_HEADERS} ${LUA_PUBLIC_HEADERS} ${LUA_RESOURCES})
 # Additional include directories
 target_include_directories(liblua PUBLIC $<INSTALL_INTERFACE:include/lua> $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/${LUA_SRC_DIR}>)
-# Additional private compile options
-target_compile_options(liblua PUBLIC -DLUA_BUILD_AS_DLL)
+# Additional public compile options
+if(WIN32)
+	target_compile_options(liblua PUBLIC -DLUA_BUILD_AS_DLL)
+endif()
 # Add a postfix in debug mode
 set_target_properties(liblua PROPERTIES DEBUG_POSTFIX "-d")
 # Use cmake folders

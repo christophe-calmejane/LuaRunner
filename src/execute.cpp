@@ -48,7 +48,7 @@ private:
 
 	// Private members
 	lua_State* _state{ nullptr };
-	plugin::Manager::UniquePointer _pluginManager{ nullptr };
+	plugin::Manager::UniquePointer _pluginManager{ nullptr, nullptr };
 };
 
 // Constructor
