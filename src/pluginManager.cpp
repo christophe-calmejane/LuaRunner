@@ -19,6 +19,7 @@
 
 #include "luaRunner/plugin.hpp"
 #include "pluginManager.hpp"
+#include "config.h"
 #include <cassert>
 #include <vector>
 
@@ -42,6 +43,11 @@ namespace luaRunner
 namespace plugin
 {
 
+//constexpr auto InitPluginEntryPointName = "?InitPlugin@@YG_NPAUlua_State@@@Z";
+//constexpr auto UninitPluginEntryPointName = "?UninitPlugin@@YGXPAUlua_State@@@Z";
+constexpr auto InitPluginEntryPointName = "InitPlugin";
+constexpr auto UninitPluginEntryPointName = "UninitPlugin";
+
 class ManagerImpl final : public Manager
 {
 public:
@@ -49,7 +55,9 @@ public:
 	ManagerImpl(lua_State* luaState) noexcept;
 
 	// Manager overrides
-	virtual LoadResult loadPlugin(std::string const& pluginPath) noexcept override;
+	virtual void clearPluginSearchPaths() noexcept override;
+	virtual void addPluginSearchPaths(std::string const& path) noexcept override;
+	virtual LoadResult loadPlugin(std::string const& pluginName) noexcept override;
 	virtual void unloadAllPlugins() noexcept override;
 
 	/** Destroy method for COM-like interface */
@@ -62,9 +70,11 @@ private:
 	// Private methods
 
 	// Private members
+	using PluginSearchPaths = std::vector<std::string>;
 	using LoadedPlugins = std::vector<DL_HANDLE>;
 
 	lua_State* _state{ nullptr };
+	PluginSearchPaths _searchPaths{};
 	LoadedPlugins _loadedPlugins{};
 };
 
@@ -81,31 +91,75 @@ ManagerImpl::~ManagerImpl() noexcept
 }
 
 // Manager overrides
-Manager::LoadResult ManagerImpl::loadPlugin(std::string const& pluginPath) noexcept
+void ManagerImpl::clearPluginSearchPaths() noexcept
 {
-	auto const handle = DL_OPEN(pluginPath.c_str());
-	if (handle == nullptr)
+	_searchPaths.clear();
+}
+
+void ManagerImpl::addPluginSearchPaths(std::string const& path) noexcept
+{
+	auto searchPath = path;
+
+	if (searchPath.back() != '/' && searchPath.back() != '\\')
+		searchPath.push_back('/');
+
+	_searchPaths.push_back(std::move(searchPath));
+}
+
+Manager::LoadResult ManagerImpl::loadPlugin(std::string const& pluginName) noexcept
+{
+	// Validate plugin name
+
+	//  1- Should not contain any '/' or '\\' (use plugin search path instead)
+	if (pluginName.find_first_of("/\\") != pluginName.npos)
+		return { false, "Plugin's name should not contain any '/' or '\\'. Use plugin search path instead." };
+
+	//  2- Should not contain any '.' (do not specify plugin extension)
+	if (pluginName.find('.') != pluginName.npos)
+		return { false, "Plugin's name should not contain any '.'. Do not specify plugin file extension, only its name." };
+
+	//  3- Should not start with 'lib' (do not specify plugin prefix)
+	if (pluginName.substr(0, 3) == "lib")
+		return { false, "Plugin's name should not start with 'lib'. Do not specify plugin file prefix, only its name." };
+
+	// Try to load plugin using all search paths
+	auto const name = LUARUNNER_PLUGIN_PREFIX + pluginName + LUARUNNER_PLUGIN_SUFFIX;
+	DL_HANDLE handle{ nullptr };
+	for (auto const& path : _searchPaths)
 	{
-		return { false, "TODO: LoadError Error Message" };
+		handle = DL_OPEN((path + name).c_str());
+		if (handle != nullptr)
+		{
+			// Check entry points
+			InitPluginFunc initFunc = reinterpret_cast<InitPluginFunc>(DL_SYM(handle, InitPluginEntryPointName));
+			if (initFunc == nullptr)
+			{
+				return { false, "InitPlugin entry point not found." };
+			}
+			UninitPluginFunc uninitFunc = reinterpret_cast<UninitPluginFunc>(DL_SYM(handle, UninitPluginEntryPointName));
+			if (uninitFunc == nullptr)
+			{
+				return { false, "UninitPlugin entry point not found." };
+			}
+
+			// Call InitPlugin entry point
+			if (!initFunc(_state))
+			{
+				return { false, "InitPlugin entry point returned an error." };
+			}
+			return { true, "" };
+		}
 	}
 
-	InitPluginFunc initFunc = reinterpret_cast<InitPluginFunc>(DL_SYM(handle, "?InitPlugin@@YG_NPAUlua_State@@@Z"));
-	if (initFunc != nullptr)
-	{
-		initFunc(_state);
-	}
-	return { true, "" };
+	return { false, "Plugin '" + pluginName + "' not found in specified search paths (" + name + ")." };
 }
 
 void ManagerImpl::unloadAllPlugins() noexcept
 {
 	for (auto const handle : _loadedPlugins)
 	{
-		UninitPluginFunc uninitFunc = reinterpret_cast<UninitPluginFunc>(DL_SYM(handle, "?UninitPlugin@@YGXPAUlua_State@@@Z"));
-		if (uninitFunc != nullptr)
-		{
-			uninitFunc(_state);
-		}
+		UninitPluginFunc uninitFunc = reinterpret_cast<UninitPluginFunc>(DL_SYM(handle, UninitPluginEntryPointName));
+		uninitFunc(_state);
 		DL_CLOSE(handle);
 	}
 	_loadedPlugins.clear();

@@ -19,7 +19,7 @@ end
 
 local lrbi = lrbi;
 lrbi.sleep(200)
-lrbi.require("dummy.dll")
+lrbi.require("Dummy")
 
 -- Calling dummyLib's 'helloWorld' method
 if(dummyLib ~= nil)

@@ -17,11 +17,6 @@
 * along with LuaRunner.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
-luaRunner -p lcomLua.dll lcomTest.lua
-luaRunner -p avdeccLua.dll -p avdeccControllerLua.dll avdeccTest.lua
-*/
-
 #include "luaRunner/execute.hpp"
 #include "luaRunner/version.hpp"
 #include <iostream>
@@ -36,12 +31,14 @@ void printHelp()
 	std::cout << "Options:" << std::endl;
 	std::cout << "  -h -> Display this help and exit" << std::endl;
 	std::cout << "  -v -> Display version and exit" << std::endl;
-	std::cout << "  -p <plugin to load> -> Load specified plugin before executing the lua script. Multiple '-p' options can be specified to load multiple plugins." << std::endl;
+	std::cout << "  -p <Name of plugin to load> -> Load specified plugin before executing the lua script. Multiple '-p' options can be specified to load multiple plugins." << std::endl;
+	std::cout << "  -s <Plugins search path> -> Search path for plugins. Multiple '-s' options can be specified to add multiple search paths." << std::endl;
 }
 
 int main(int argc, char const* argv[])
 {
 	std::vector<std::string> pluginsToLoad{};
+	std::vector<std::string> pluginsSearchPaths{};
 	std::string scriptToExecute{};
 	luaRunner::execute::Executor::ScriptParameters scriptsParameters{};
 
@@ -77,6 +74,19 @@ int main(int argc, char const* argv[])
 				}
 				pluginsToLoad.push_back(argv[currentPos + 1]);
 			}
+			else if (arg == "-s")
+			{
+				// This option requires an additional argument
+				auto const currentPos = argPos;
+				++argPos;
+				if (argPos >= argc)
+				{
+					std::cout << "Missing parameter for '-s' option." << std::endl << std::endl;
+					printHelp();
+					exit(1);
+				}
+				pluginsSearchPaths.push_back(argv[currentPos + 1]);
+			}
 		}
 		// This is the script to execute
 		else
@@ -97,13 +107,23 @@ int main(int argc, char const* argv[])
 		++argPos;
 	}
 
+	if (scriptToExecute.empty())
+	{
+		std::cout << "No script specified." << std::endl << std::endl;
+		printHelp();
+		exit(1);
+	}
+
 	auto& executor{ luaRunner::execute::Executor::getInstance() };
 
+	// Set plugin search paths
+	executor.setPluginSearchPaths(pluginsSearchPaths);
+
 	// Load plugin(s) if any
-	for (auto const& pluginPath : pluginsToLoad)
+	for (auto const& pluginName : pluginsToLoad)
 	{
-		std::cout << "Loading plugin '" << pluginPath << "'" << std::endl;
-		auto const loadResult = executor.loadPlugin(pluginPath);
+		std::cout << "Loading plugin '" << pluginName << "'" << std::endl;
+		auto const loadResult = executor.loadPlugin(pluginName);
 		auto const result = std::get<0>(loadResult);
 		auto const errorString = std::get<1>(loadResult);
 		if (!result)
