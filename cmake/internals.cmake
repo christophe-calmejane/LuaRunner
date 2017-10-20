@@ -50,7 +50,7 @@ function(lr_force_symbols_file TARGET_NAME)
 		target_compile_options(${TARGET_NAME} PRIVATE -g)
 
 		if(${targetType} STREQUAL "STATIC_LIBRARY")
-			# MacOS do not support dSYM file for static libraries
+			# macOS do not support dSYM file for static libraries
 			set_target_properties(${TARGET_NAME} PROPERTIES
 				XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT[variant=Debug] "dwarf"
 				XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT[variant=Release] "dwarf"
@@ -160,7 +160,7 @@ function(lr_setup_executable_options TARGET_NAME)
 	# Setup debug symbols
 	lr_setup_symbols(${TARGET_NAME})
 
-	# Set rpath for MacOs
+	# Set rpath for macOs
 	if(APPLE)
 		get_target_property(isBundle ${TARGET_NAME} MACOSX_BUNDLE)
 		if(${isBundle})

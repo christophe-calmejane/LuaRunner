@@ -37,7 +37,7 @@ public:
 	using LoadResult = std::tuple<bool, std::string>;
 
 	/**
-	* @brief Factory to create a new Manager.
+	* @brief Factory method to create a new Manager.
 	* @details Creates a new Manager as a unique pointer.
 	* @param[in] luaState A valid lua_State.
 	* @return A new Manager as a Manager::UniquePointer.
