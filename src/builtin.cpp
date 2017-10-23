@@ -43,14 +43,14 @@ int utils_sleep(lua_State* luaState)
 
 /*
 * Loads the specified luaRunner plugin into the lua VM. Plugin must be found and valid or an error will be thrown.
-* [in] pluginPath The path of the luaRunner plugin to load.
+* [in] pluginName The name of the luaRunner plugin to load.
 */
 int utils_require(lua_State* luaState)
 {
-	auto const* const pluginPath = luaL_checklstring(luaState, 1, NULL);
+	auto const* const pluginName = luaL_checklstring(luaState, 1, NULL);
 
 	auto& executor{ execute::Executor::getInstance() };
-	auto const loadResult = executor.loadPlugin(pluginPath);
+	auto const loadResult = executor.loadPlugin(pluginName);
 	auto const result = std::get<0>(loadResult);
 	auto const errorString = std::get<1>(loadResult);
 	if (!result)

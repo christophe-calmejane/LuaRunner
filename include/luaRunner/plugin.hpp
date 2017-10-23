@@ -23,19 +23,13 @@
 
 #ifdef _WIN32
 
-# define LUARUNNER_CALL_CONVENTION __stdcall
-
-# if defined(LUARUNNER_IMPORTS)
-#   define LUARUNNER_API __declspec(dllimport)
-# else // !LUARUNNER_IMPORTS
-#   define LUARUNNER_API __declspec(dllexport)
-# endif // LUARUNNER_IMPORTS
+# define LUARUNNER_CALL_CONVENTION __cdecl
+# define LUARUNNER_API extern "C" __declspec(dllexport)
 
 #else // !_WIN32
 
 #define LUARUNNER_CALL_CONVENTION
-
-#define LUARUNNER_API __attribute__((visibility("default")))
+#define LUARUNNER_API extern "C" __attribute__((visibility("default")))
 
 #endif // _WIN32
 

@@ -37,7 +37,8 @@ public:
 	~ExecutorImpl() noexcept;
 
 	// Executor overrides
-	virtual LoadResult loadPlugin(std::string const& pluginPath) noexcept override;
+	virtual void setPluginSearchPaths(PluginSearchPaths const& searchPaths) noexcept override;
+	virtual LoadResult loadPlugin(std::string const& pluginName) noexcept override;
 	virtual ExecuteResult executeLuaFileWithParameters(std::string const& luaFilePath, ScriptParameters const& parameters) noexcept override;
 
 private:
@@ -71,9 +72,22 @@ ExecutorImpl::~ExecutorImpl() noexcept
 }
 
 // Executor overrides
-Executor::LoadResult ExecutorImpl::loadPlugin(std::string const& pluginPath) noexcept
+void ExecutorImpl::setPluginSearchPaths(PluginSearchPaths const& searchPaths) noexcept
 {
-	auto const loadResult = _pluginManager->loadPlugin(pluginPath);
+	// Clear previous search paths
+	_pluginManager->clearPluginSearchPaths();
+
+	// Always add current directory path
+	_pluginManager->addPluginSearchPaths(".");
+
+	// Add other search paths
+	for (auto const& path : searchPaths)
+		_pluginManager->addPluginSearchPaths(path);
+}
+
+Executor::LoadResult ExecutorImpl::loadPlugin(std::string const& pluginName) noexcept
+{
+	auto const loadResult = _pluginManager->loadPlugin(pluginName);
 	auto const result = std::get<0>(loadResult);
 	auto const errorString = std::get<1>(loadResult);
 	if (!result)

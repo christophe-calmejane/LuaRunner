@@ -66,10 +66,17 @@ target_link_libraries(LuaRunner luaRunner_static)
 install(TARGETS LuaRunner RUNTIME DESTINATION bin)
 
 # Copy liblua to output folder as post-build (for easy test/debug)
+if(APPLE)
+	set(addSubDestPath "/lib") # For mac, we copy the dylibs to the lib sub folder, so it matches the same rpath than when installing (since we use install_rpath)
+else()
+	set(addSubDestPath "")
+endif()
+
 add_custom_command(
 	TARGET LuaRunner
 	POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:liblua> "${CMAKE_CURRENT_BINARY_DIR}"
+	COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}${addSubDestPath}"
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:liblua> "${CMAKE_CURRENT_BINARY_DIR}${addSubDestPath}"
 	COMMENT "Copying liblua to LuaRunner output folder for easy debug"
 	VERBATIM
 )
