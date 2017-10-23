@@ -42,13 +42,15 @@ public:
 	};
 
 	using LuaBuffer = std::string;
+	using PluginSearchPaths = std::vector<std::string>;
 	using ScriptParameters = std::vector<std::string>;
 	using LoadResult = std::tuple<Result, std::string>;
 	using ExecuteResult = std::tuple<Result, std::string>;
 
 	static Executor& getInstance() noexcept;
 
-	virtual LoadResult loadPlugin(std::string const& pluginPath) noexcept = 0;
+	virtual void setPluginSearchPaths(PluginSearchPaths const& searchPaths) noexcept = 0;
+	virtual LoadResult loadPlugin(std::string const& pluginName) noexcept = 0;
 
 	/** Result, ErrorString (if Result != Success) */
 	virtual ExecuteResult executeLuaFileWithParameters(std::string const& luaFilePath, ScriptParameters const& parameters) noexcept = 0;

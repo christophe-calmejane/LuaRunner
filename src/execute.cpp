@@ -17,7 +17,7 @@
 * along with LuaRunner.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "execute.hpp"
+#include "luaRunner/execute.hpp"
 #include "pluginManager.hpp"
 #include "builtin.hpp"
 #include <lua.hpp>
@@ -37,7 +37,8 @@ public:
 	~ExecutorImpl() noexcept;
 
 	// Executor overrides
-	virtual LoadResult loadPlugin(std::string const& pluginPath) noexcept override;
+	virtual void setPluginSearchPaths(PluginSearchPaths const& searchPaths) noexcept override;
+	virtual LoadResult loadPlugin(std::string const& pluginName) noexcept override;
 	virtual ExecuteResult executeLuaFileWithParameters(std::string const& luaFilePath, ScriptParameters const& parameters) noexcept override;
 
 private:
@@ -48,7 +49,7 @@ private:
 
 	// Private members
 	lua_State* _state{ nullptr };
-	plugin::Manager::UniquePointer _pluginManager {nullptr};
+	plugin::Manager::UniquePointer _pluginManager{ nullptr, nullptr };
 };
 
 // Constructor
@@ -71,16 +72,29 @@ ExecutorImpl::~ExecutorImpl() noexcept
 }
 
 // Executor overrides
-Executor::LoadResult ExecutorImpl::loadPlugin(std::string const& pluginPath) noexcept
+void ExecutorImpl::setPluginSearchPaths(PluginSearchPaths const& searchPaths) noexcept
 {
-	auto const loadResult = _pluginManager->loadPlugin(pluginPath);
+	// Clear previous search paths
+	_pluginManager->clearPluginSearchPaths();
+
+	// Always add current directory path
+	_pluginManager->addPluginSearchPaths(".");
+
+	// Add other search paths
+	for (auto const& path : searchPaths)
+		_pluginManager->addPluginSearchPaths(path);
+}
+
+Executor::LoadResult ExecutorImpl::loadPlugin(std::string const& pluginName) noexcept
+{
+	auto const loadResult = _pluginManager->loadPlugin(pluginName);
 	auto const result = std::get<0>(loadResult);
 	auto const errorString = std::get<1>(loadResult);
 	if (!result)
 	{
-		return {Result::LoadError, errorString};
+		return { Result::LoadError, errorString };
 	}
-	return {Result::Success, ""};
+	return { Result::Success, "" };
 }
 
 Executor::ExecuteResult ExecutorImpl::executeLuaFileWithParameters(std::string const& luaFilePath, ScriptParameters const& parameters) noexcept

@@ -17,7 +17,7 @@ source_group("Source Files" FILES ${SOURCE_FILES_COMMON})
 # Define target
 add_library(Dummy SHARED ${HEADER_FILES_COMMON} ${SOURCE_FILES_COMMON})
 target_compile_options(Dummy PRIVATE "-D_CRT_SECURE_NO_WARNINGS")
-target_include_directories(Dummy PRIVATE ${LUARUNNER_ROOT_FOLDER}/src)
+target_link_libraries(Dummy luaRunnerPlugin_interface)
 target_link_libraries(Dummy liblua)
 
 # Copy shared library to output folder as post-build (for easy test/debug)

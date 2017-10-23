@@ -8,3 +8,4 @@
 
 *.txt			text_lf
 *.sh			text_lf
+*.lua			text_lf

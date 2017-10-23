@@ -37,7 +37,7 @@ public:
 	using LoadResult = std::tuple<bool, std::string>;
 
 	/**
-	* @brief Factory to create a new Manager.
+	* @brief Factory method to create a new Manager.
 	* @details Creates a new Manager as a unique pointer.
 	* @param[in] luaState A valid lua_State.
 	* @return A new Manager as a Manager::UniquePointer.
@@ -51,8 +51,11 @@ public:
 		return UniquePointer(createRawManager(luaState), deleter);
 	}
 
+	virtual void clearPluginSearchPaths() noexcept = 0;
+	virtual void addPluginSearchPaths(std::string const& path) noexcept = 0;
+
 	/** Result, ErrorString (if Result != Success) */
-	virtual LoadResult loadPlugin(std::string const& pluginPath) noexcept = 0;
+	virtual LoadResult loadPlugin(std::string const& pluginName) noexcept = 0;
 
 	virtual void unloadAllPlugins() noexcept = 0;
 

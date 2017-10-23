@@ -7,7 +7,7 @@ FILEVERSION ${LUA_VERSIONMAJ},${LUA_VERSIONMIN},${LUA_VERSIONSUB},0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
-    BLOCK "040904E4"
+    BLOCK "0409FDE9"
     BEGIN
 			VALUE "CompanyName", "PUC-Rio\0"
 			VALUE "FileDescription", "Lua VM Shared Library\0"

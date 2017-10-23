@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.6)
 # Using Semantic Versioning (http://semver.org/spec/v2.0.0.html)
 # Project version number x.y.z on main branch, x.y.z.w on dev and task branches
 # Example: 1.5.0 is the upcoming release version (main branch) of current 1.5.0.3 devel version (dev/task)
-set(LUARUNNER_VERSION 1.0.0)
+set(LUARUNNER_VERSION 1.1.0)
 
 ############ CMake configuration
 
@@ -29,6 +29,9 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set(CMAKE_INSTALL_PREFIX "./Install" CACHE PATH "default install path" FORCE)
 endif()
 
+# Include our internal macros
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/internals.cmake)
+
 ############ Define some variables
 
 set(TARGET_ARCH 32)
@@ -39,7 +42,6 @@ set(VS_USE_CLANG FALSE)
 if(MSVC AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 	set(VS_USE_CLANG TRUE)
 endif()
-set(LUARUNNER_ROOT_FOLDER ${CMAKE_CURRENT_SOURCE_DIR})
 
 ############ Add projects
 
