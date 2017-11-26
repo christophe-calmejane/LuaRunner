@@ -51,3 +51,5 @@ then
 else
 	error("dummyLib not loaded!")
 end
+
+return 1 -- Optional return value

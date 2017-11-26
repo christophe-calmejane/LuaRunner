@@ -39,13 +39,15 @@ public:
 		InitError = 2, /**< Error initialiazing the plugin */
 		ParseError = 3, /**< Error parsing lua script (file or buffer) */
 		ExecError = 4, /**< Error executing lua script (file or buffer) */
+		ReturnError = 5, /**< Successfully executed the script but invalid return value */
 	};
 
 	using LuaBuffer = std::string;
 	using PluginSearchPaths = std::vector<std::string>;
 	using ScriptParameters = std::vector<std::string>;
 	using LoadResult = std::tuple<Result, std::string>;
-	using ExecuteResult = std::tuple<Result, std::string>;
+	using ScriptReturnValue = std::uint8_t; // Clamped to [0-127]
+	using ExecuteResult = std::tuple<Result, ScriptReturnValue, std::string>;
 
 	static Executor& getInstance() noexcept;
 

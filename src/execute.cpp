@@ -103,7 +103,7 @@ Executor::ExecuteResult ExecutorImpl::executeLuaFileWithParameters(std::string c
 
 	if (luaL_loadfile(_state, luaFilePath.c_str()))
 	{
-		return { Result::ParseError, lua_tostring(_state, -1) };
+		return { Result::ParseError, ScriptReturnValue(253u), lua_tostring(_state, -1) };
 	}
 	return execute();
 }
@@ -134,13 +134,27 @@ Executor::ExecuteResult ExecutorImpl::execute() noexcept
 	if (lua_pcall(
 		_state,
 		0, //number_of_args,
-		0, //number_of_returns,
+		1, //number_of_returns,
 		0 //errfunc_idx
 	))
 	{
-		return { Result::ExecError, lua_tostring(_state, -1) };
+		return { Result::ExecError, ScriptReturnValue(253u), lua_tostring(_state, -1) };
 	}
-	return { Result::Success, "" };
+
+	// Check if there is a returned value by the script
+	auto const type = lua_type(_state, -1);
+	if (type != LUA_TNIL && (type != LUA_TNUMBER || lua_isinteger(_state, -1) == 0))
+	{
+		return { Result::ReturnError, ScriptReturnValue(252u), "Should be an integer (or no value)" };
+	}
+	
+	auto const retValue = lua_tointeger(_state, -1); // If no value was returned, lua_tointeger will return 0
+	if (retValue < 0 || retValue >= 128)
+	{
+		return { Result::ReturnError, ScriptReturnValue(252u), "Should be comprised between 0 and 127 (inclusive)" };
+	}
+
+	return { Result::Success, static_cast<ScriptReturnValue>(retValue), "" };
 }
 
 // Executor methods
@@ -158,6 +172,8 @@ std::string Executor::resultToString(Result const result) noexcept
 			return "Parse Error";
 		case Result::ExecError:
 			return "Exec Error";
+		case Result::ReturnError:
+			return "Invalid return value";
 		default:
 			assert(false && "luaRunner::execute::Executor::Result value not handled");
 			return "Unknown Result";

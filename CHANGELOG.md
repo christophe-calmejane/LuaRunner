@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Scripts can now return an optional integer value comprised between 0 and 127
 
 ## [1.1.0] - 2017-10-23
 ### Added
