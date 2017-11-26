@@ -33,6 +33,12 @@ void printHelp()
 	std::cout << "  -v -> Display version and exit" << std::endl;
 	std::cout << "  -p <Name of plugin to load> -> Load specified plugin before executing the lua script. Multiple '-p' options can be specified to load multiple plugins." << std::endl;
 	std::cout << "  -s <Plugins search path> -> Search path for plugins. Multiple '-s' options can be specified to add multiple search paths." << std::endl;
+	std::cout << "Returned value:" << std::endl;
+	std::cout << "  255: Parameter error" << std::endl;
+	std::cout << "  254: Plugin load error" << std::endl;
+	std::cout << "  253: Script error" << std::endl;
+	std::cout << "  252: Invalid script returned value: must either be nothing or an integer value between 0 and 127 (inclusive)" << std::endl;
+	std::cout << "  0-127: Script returned value (0 by default)" << std::endl;
 }
 
 int main(int argc, char const* argv[])
@@ -54,12 +60,12 @@ int main(int argc, char const* argv[])
 			if (arg == "-h")
 			{
 				printHelp();
-				exit(1);
+				return 0;
 			}
 			else if (arg == "-v")
 			{
 				std::cout << "LuaRunner version v" << luaRunner::getVersion() << std::endl;
-				exit(1);
+				return 0;
 			}
 			else if (arg == "-p")
 			{
@@ -70,7 +76,7 @@ int main(int argc, char const* argv[])
 				{
 					std::cout << "Missing parameter for '-p' option." << std::endl << std::endl;
 					printHelp();
-					exit(1);
+					return 255;
 				}
 				pluginsToLoad.push_back(argv[currentPos + 1]);
 			}
@@ -83,7 +89,7 @@ int main(int argc, char const* argv[])
 				{
 					std::cout << "Missing parameter for '-s' option." << std::endl << std::endl;
 					printHelp();
-					exit(1);
+					return 255;
 				}
 				pluginsSearchPaths.push_back(argv[currentPos + 1]);
 			}
@@ -111,7 +117,7 @@ int main(int argc, char const* argv[])
 	{
 		std::cout << "No script specified." << std::endl << std::endl;
 		printHelp();
-		exit(1);
+		return 255;
 	}
 
 	auto& executor{ luaRunner::execute::Executor::getInstance() };
@@ -129,6 +135,7 @@ int main(int argc, char const* argv[])
 		if (!result)
 		{
 			std::cout << "Failed to load plugin: " << luaRunner::execute::Executor::resultToString(result) << ": " << errorString << std::endl;
+			return 254;
 		}
 	}
 
@@ -137,12 +144,13 @@ int main(int argc, char const* argv[])
 
 	auto const executeResult = executor.executeLuaFileWithParameters(scriptToExecute, scriptsParameters);
 	auto const result = std::get<0>(executeResult);
-	auto const errorString = std::get<1>(executeResult);
+	auto const scriptReturnValue = std::get<1>(executeResult);
+	auto const errorString = std::get<2>(executeResult);
 
 	if (!result)
 	{
 		std::cout << "Failed to execute script: " << luaRunner::execute::Executor::resultToString(result) << ": " << errorString << std::endl;
 	}
 
-	return 0;
+	return scriptReturnValue;
 }
