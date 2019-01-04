@@ -1,5 +1,5 @@
 /*
-* Copyright 2017, Christophe Calmejane
+* Copyright 2017-2019, Christophe Calmejane
 
 * This file is part of LuaRunner.
 
