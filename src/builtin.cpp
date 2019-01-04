@@ -27,7 +27,6 @@ namespace luaRunner
 {
 namespace builtin
 {
-
 /*
 * Pauses current thread for the specified milliseconds
 * [in] msec The number of milliseconds to pause the current thread for.
@@ -63,9 +62,7 @@ int utils_require(lua_State* luaState)
 
 constexpr luaL_Reg builtins[] = {
 	// Utils methods
-	{"sleep", utils_sleep},
-	{"require", utils_require},
-	{NULL, NULL}
+	{ "sleep", utils_sleep }, { "require", utils_require }, { NULL, NULL }
 };
 
 int luaopen_builtins(lua_State* luaState)
@@ -77,7 +74,7 @@ int luaopen_builtins(lua_State* luaState)
 void loadBuiltins(lua_State* luaState) noexcept
 {
 	luaL_requiref(luaState, "lrbi", luaopen_builtins, 1);
-	lua_pop(luaState, 1);  /* remove lib from the stack (luaL_requiref left it on the stack) */
+	lua_pop(luaState, 1); /* remove lib from the stack (luaL_requiref left it on the stack) */
 }
 
 } // namespace builtin

@@ -23,18 +23,18 @@
 
 #ifdef _WIN32
 
-# define LUARUNNER_CALL_CONVENTION __cdecl
-# define LUARUNNER_API extern "C" __declspec(dllexport)
+#	define LUARUNNER_CALL_CONVENTION __cdecl
+#	define LUARUNNER_API extern "C" __declspec(dllexport)
 
 #else // !_WIN32
 
-#define LUARUNNER_CALL_CONVENTION
-#define LUARUNNER_API extern "C" __attribute__((visibility("default")))
+#	define LUARUNNER_CALL_CONVENTION
+#	define LUARUNNER_API extern "C" __attribute__((visibility("default")))
 
 #endif // _WIN32
 
 /** True if success. Plugin must export a function named 'InitPlugin' with that prototype. */
-typedef bool (LUARUNNER_CALL_CONVENTION *InitPluginFunc)(lua_State* luaState);
+typedef bool(LUARUNNER_CALL_CONVENTION* InitPluginFunc)(lua_State* luaState);
 
 /** True if success. Plugin must export a function named 'UninitPlugin' with that prototype. */
-typedef void (LUARUNNER_CALL_CONVENTION *UninitPluginFunc)(lua_State* luaState);
+typedef void(LUARUNNER_CALL_CONVENTION* UninitPluginFunc)(lua_State* luaState);

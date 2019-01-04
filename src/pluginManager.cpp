@@ -24,25 +24,24 @@
 #include <vector>
 
 #ifdef _WIN32
-#include <Windows.h>
-#define DL_HANDLE HMODULE
-#define DL_OPEN(library) LoadLibraryA(library)
-#define DL_CLOSE(handle) FreeLibrary(handle)
-#define DL_SYM(handle,symbol) GetProcAddress(handle,symbol)
+#	include <Windows.h>
+#	define DL_HANDLE HMODULE
+#	define DL_OPEN(library) LoadLibraryA(library)
+#	define DL_CLOSE(handle) FreeLibrary(handle)
+#	define DL_SYM(handle, symbol) GetProcAddress(handle, symbol)
 #else // !_WIN32
-#include <dlfcn.h>
-#include <signal.h>
-#define DL_HANDLE void*
-#define DL_OPEN(library) dlopen(library,RTLD_LAZY)
-#define DL_CLOSE(handle) dlclose(handle)
-#define DL_SYM(handle,symbol) dlsym(handle,symbol)
+#	include <dlfcn.h>
+#	include <signal.h>
+#	define DL_HANDLE void*
+#	define DL_OPEN(library) dlopen(library, RTLD_LAZY)
+#	define DL_CLOSE(handle) dlclose(handle)
+#	define DL_SYM(handle, symbol) dlsym(handle, symbol)
 #endif // _WIN32
 
 namespace luaRunner
 {
 namespace plugin
 {
-
 constexpr auto InitPluginEntryPointName = "InitPlugin";
 constexpr auto UninitPluginEntryPointName = "UninitPlugin";
 

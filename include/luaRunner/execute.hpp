@@ -28,7 +28,6 @@ namespace luaRunner
 {
 namespace execute
 {
-
 class Executor
 {
 public:

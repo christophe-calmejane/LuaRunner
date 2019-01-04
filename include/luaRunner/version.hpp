@@ -23,7 +23,6 @@
 
 namespace luaRunner
 {
-
 std::string getVersion() noexcept;
 
 } // namespace luaRunner

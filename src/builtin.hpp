@@ -29,7 +29,6 @@ namespace luaRunner
 {
 namespace builtin
 {
-
 void loadBuiltins(lua_State* luaState) noexcept;
 
 } // namespace builtin

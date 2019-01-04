@@ -27,7 +27,6 @@ namespace luaRunner
 {
 namespace execute
 {
-
 class ExecutorImpl final : public Executor
 {
 public:
@@ -42,7 +41,6 @@ public:
 	virtual ExecuteResult executeLuaFileWithParameters(std::string const& luaFilePath, ScriptParameters const& parameters) noexcept override;
 
 private:
-
 	// Private methods
 	void pushParamsToLua(ScriptParameters const& parameters) noexcept;
 	ExecuteResult execute() noexcept;
@@ -131,12 +129,11 @@ void ExecutorImpl::pushParamsToLua(ScriptParameters const& parameters) noexcept
 
 Executor::ExecuteResult ExecutorImpl::execute() noexcept
 {
-	if (lua_pcall(
-		_state,
-		0, //number_of_args,
-		1, //number_of_returns,
-		0 //errfunc_idx
-	))
+	if (lua_pcall(_state,
+				0, //number_of_args,
+				1, //number_of_returns,
+				0 //errfunc_idx
+				))
 	{
 		return { Result::ExecError, ScriptReturnValue(253u), lua_tostring(_state, -1) };
 	}
@@ -147,7 +144,7 @@ Executor::ExecuteResult ExecutorImpl::execute() noexcept
 	{
 		return { Result::ReturnError, ScriptReturnValue(252u), "Should be an integer (or no value)" };
 	}
-	
+
 	auto const retValue = lua_tointeger(_state, -1); // If no value was returned, lua_tointeger will return 0
 	if (retValue < 0 || retValue >= 128)
 	{

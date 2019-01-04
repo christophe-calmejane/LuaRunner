@@ -29,11 +29,10 @@ namespace luaRunner
 {
 namespace plugin
 {
-
 class Manager
 {
 public:
-	using UniquePointer = std::unique_ptr<Manager, void(*)(Manager*)>;
+	using UniquePointer = std::unique_ptr<Manager, void (*)(Manager*)>;
 	using LoadResult = std::tuple<bool, std::string>;
 
 	/**

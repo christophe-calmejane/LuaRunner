@@ -145,12 +145,7 @@ int dummy_varParams(lua_State* luaState)
 
 constexpr luaL_Reg dummyLib[] = {
 	// Dummy methods
-	{"helloWorld", dummy_helloWorld},
-	{"printTable", dummy_printTable},
-	{"getTable", dummy_getTable},
-	{"optParams", dummy_optParams},
-	{"varParams", dummy_varParams},
-	{NULL, NULL}
+	{ "helloWorld", dummy_helloWorld }, { "printTable", dummy_printTable }, { "getTable", dummy_getTable }, { "optParams", dummy_optParams }, { "varParams", dummy_varParams }, { NULL, NULL }
 };
 
 int luaopen_dummyLib(lua_State* luaState)
@@ -162,11 +157,9 @@ int luaopen_dummyLib(lua_State* luaState)
 LUARUNNER_API bool LUARUNNER_CALL_CONVENTION InitPlugin(lua_State* luaState)
 {
 	luaL_requiref(luaState, "dummyLib", luaopen_dummyLib, 1);
-	lua_pop(luaState, 1);  /* remove lib from the stack (luaL_requiref left it on the stack) */
+	lua_pop(luaState, 1); /* remove lib from the stack (luaL_requiref left it on the stack) */
 
 	return true;
 }
 
-LUARUNNER_API void LUARUNNER_CALL_CONVENTION UninitPlugin(lua_State* luaState)
-{
-}
+LUARUNNER_API void LUARUNNER_CALL_CONVENTION UninitPlugin(lua_State* luaState) {}
