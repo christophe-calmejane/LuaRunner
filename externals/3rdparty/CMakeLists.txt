@@ -107,8 +107,22 @@ if(WIN32)
 endif()
 # Add a postfix in debug mode
 set_target_properties(liblua PROPERTIES DEBUG_POSTFIX "-d")
+# Set proper warning level
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang") # Clang and AppleClang
+	target_compile_options(liblua PRIVATE -W -Wno-everything)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	target_compile_options(liblua PRIVATE -W -Wno-unused-variable -Wno-unused-but-set-variable -Wno-ignored-qualifiers -Wno-sign-compare)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	target_compile_options(liblua PRIVATE /W3)
+else()
+	message(FATAL_ERROR "Unsupported Compiler: ${CMAKE_CXX_COMPILER_ID}")
+endif()
 # Use cmake folders
 set_target_properties(liblua PROPERTIES FOLDER "Libraries/3rdParty")
 # Setup install rules
-lr_setup_library_install_rules(liblua)
-install(FILES ${LUA_PUBLIC_HEADERS} DESTINATION include/lua)
+if(INSTALL_LUARUNNER_LIBS)
+	lr_setup_library_install_rules(liblua)
+endif()
+if(INSTALL_LUARUNNER_HEADERS)
+	install(FILES ${LUA_PUBLIC_HEADERS} DESTINATION include/lua)
+endif()

@@ -50,40 +50,51 @@ target_compile_options(luaRunner_static PRIVATE "-DLUARUNNER_IMPORTS")
 # Additional link libraries
 target_link_libraries(luaRunner_static PUBLIC liblua)
 # Setup install rules
-lr_setup_library_install_rules(luaRunner_static)
-install(FILES ${HEADER_FILES_PUBLIC} DESTINATION include/luaRunner)
+if(INSTALL_LUARUNNER_LIBS)
+	lr_setup_library_install_rules(luaRunner_static)
+endif()
+if(INSTALL_LUARUNNER_HEADERS)
+	install(FILES ${HEADER_FILES_PUBLIC} DESTINATION include/luaRunner)
+endif()
 
 set(SOURCE_FILES_BINARY
 	luaRunner.cpp
 )
+
 # Binary target
-add_executable(LuaRunner ${SOURCE_FILES_BINARY})
-# Setup common options
-lr_setup_executable_options(LuaRunner)
-# Additional link libraries
-target_link_libraries(LuaRunner luaRunner_static)
-# Setup install rules
-install(TARGETS LuaRunner RUNTIME DESTINATION bin)
+if(BUILD_LUARUNNER_EXECUTABLE)
+	add_executable(LuaRunner ${SOURCE_FILES_BINARY})
+	# Setup common options
+	lr_setup_executable_options(LuaRunner)
+	# Additional link libraries
+	target_link_libraries(LuaRunner luaRunner_static)
+	# Setup install rules
+	if(INSTALL_LUARUNNER_EXECUTABLE)
+		install(TARGETS LuaRunner RUNTIME DESTINATION bin)
+	endif()
 
-# Copy liblua to output folder as post-build (for easy test/debug)
-if(APPLE)
-	set(addSubDestPath "/lib") # For mac, we copy the dylibs to the lib sub folder, so it matches the same rpath than when installing (since we use install_rpath)
-else()
-	set(addSubDestPath "")
+	# Copy liblua to output folder as post-build (for easy test/debug)
+	if(APPLE)
+		set(addSubDestPath "/lib") # For mac, we copy the dylibs to the lib sub folder, so it matches the same rpath than when installing (since we use install_rpath)
+	else()
+		set(addSubDestPath "")
+	endif()
+
+	add_custom_command(
+		TARGET LuaRunner
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}${addSubDestPath}"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:liblua> "${CMAKE_CURRENT_BINARY_DIR}${addSubDestPath}"
+		COMMENT "Copying liblua to LuaRunner output folder for easy debug"
+		VERBATIM
+	)
 endif()
-
-add_custom_command(
-	TARGET LuaRunner
-	POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}${addSubDestPath}"
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:liblua> "${CMAKE_CURRENT_BINARY_DIR}${addSubDestPath}"
-	COMMENT "Copying liblua to LuaRunner output folder for easy debug"
-	VERBATIM
-)
 
 # Plugin interface target
 add_library(luaRunnerPlugin_interface INTERFACE)
 # Additional include directories
 target_include_directories(luaRunnerPlugin_interface INTERFACE $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${LUARUNNER_ROOT_FOLDER}/include>)
 # Setup install rules
-lr_setup_library_install_rules(luaRunnerPlugin_interface)
+if(INSTALL_LUARUNNER_LIBS)
+	lr_setup_library_install_rules(luaRunnerPlugin_interface)
+endif()

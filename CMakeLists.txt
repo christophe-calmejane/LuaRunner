@@ -1,14 +1,29 @@
 # LuaRunner project
 
 # Minimum CMake version
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.13)
 
 ############ Versioning
 
 # Using Semantic Versioning (http://semver.org/spec/v2.0.0.html)
-# Project version number x.y.z on main branch, x.y.z.w on dev and task branches
-# Example: 1.5.0 is the upcoming release version (main branch) of current 1.5.0.3 devel version (dev/task)
-set(LUARUNNER_VERSION 1.2.1.1)
+# This variable defines the project version number.
+# It should have 3 digits (x.y.z) on main branch, and 4 digits (x.y.z.w) on dev and task branches. The last digit being used as beta label.
+# As soon as an API change occurs in dev or task branch, update the version number by following SemVer rules (so the API breaking changes are not lost/forgotten).
+# Example: 1.5.0 is the upcoming release version (main branch) of current 1.5.0.3 devel version (dev/task) which will be labelled 1.5.0-beta3
+set(LUARUNNER_VERSION 1.2.1.2)
+
+############ Override from command line "CMake -D<OPTION>=TRUE/FALSE/0/1/ON/OFF"
+
+# Build options
+option(BUILD_LUARUNNER_PLUGINS "Build plugins." FALSE)
+option(BUILD_LUARUNNER_EXECUTABLE "Build LuaRunner Executable." TRUE)
+# Install options
+option(INSTALL_LUARUNNER_PLUGINS "Install plugins." FALSE)
+option(INSTALL_LUARUNNER_LIBS "Install libraries." TRUE)
+option(INSTALL_LUARUNNER_EXECUTABLE "Install LuaRunner Executable." TRUE)
+option(INSTALL_LUARUNNER_HEADERS "Install headers." TRUE)
+# Signing options
+option(ENABLE_LUARUNNER_SIGNING "Enable binaries signing." FALSE)
 
 ############ CMake configuration
 
@@ -54,8 +69,10 @@ message(STATUS "Building LuaRunner")
 add_subdirectory(src)
 
 # Add plugins
-message(STATUS "Building plugins")
-add_subdirectory(plugins)
+if(BUILD_LUARUNNER_PLUGINS)
+	message(STATUS "Building plugins")
+	add_subdirectory(plugins)
+endif()
 
 # Set VisualStudio startup project
 set_directory_properties(PROPERTIES VS_STARTUP_PROJECT LuaRunner)
