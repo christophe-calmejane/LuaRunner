@@ -39,6 +39,8 @@ void printHelp()
 	std::cout << "  253: Script error" << std::endl;
 	std::cout << "  252: Invalid script returned value: must either be nothing or an integer value between 0 and 127 (inclusive)" << std::endl;
 	std::cout << "  0-127: Script returned value (0 by default)" << std::endl;
+	std::cout << "lua script parameters will be pushed to the index-based table named 'argv' along with the integer value 'argc' which represents the number of arguments. The first element is always the script file (like in a C program)." << std::endl;
+	std::cout << "(Note that table indexes start at 1 in lua, not 0)" << std::endl;
 }
 
 int main(int argc, char const* argv[])

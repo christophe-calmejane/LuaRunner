@@ -17,9 +17,11 @@
 * along with LuaRunner.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "luaRunner/execute.hpp"
 #include "pluginManager.hpp"
 #include "builtin.hpp"
+
+#include "luaRunner/execute.hpp"
+
 #include <lua.hpp>
 #include <cassert>
 
@@ -42,7 +44,7 @@ public:
 
 private:
 	// Private methods
-	void pushParamsToLua(ScriptParameters const& parameters) noexcept;
+	void pushParamsToLua(std::string const& luaFilePath, ScriptParameters const& parameters) noexcept;
 	ExecuteResult execute() noexcept;
 
 	// Private members
@@ -97,7 +99,7 @@ Executor::LoadResult ExecutorImpl::loadPlugin(std::string const& pluginName) noe
 
 Executor::ExecuteResult ExecutorImpl::executeLuaFileWithParameters(std::string const& luaFilePath, ScriptParameters const& parameters) noexcept
 {
-	pushParamsToLua(parameters);
+	pushParamsToLua(luaFilePath, parameters);
 
 	if (luaL_loadfile(_state, luaFilePath.c_str()))
 	{
@@ -107,15 +109,21 @@ Executor::ExecuteResult ExecutorImpl::executeLuaFileWithParameters(std::string c
 }
 
 // Private methods
-void ExecutorImpl::pushParamsToLua(ScriptParameters const& parameters) noexcept
+void ExecutorImpl::pushParamsToLua(std::string const& luaFilePath, ScriptParameters const& parameters) noexcept
 {
 	lua_newtable(_state);
 
 	auto tableIndex{ 1u }; // Lua table index start at 1 (not 0)
 
+	// Push script file as first parameter
+	lua_pushinteger(_state, tableIndex);
+	lua_pushstring(_state, luaFilePath.c_str());
+	lua_rawset(_state, -3);
+	++tableIndex;
+
 	for (auto const& param : parameters)
 	{
-		// Push eash argN
+		// Push each argN
 		lua_pushinteger(_state, tableIndex);
 		lua_pushstring(_state, param.c_str());
 		lua_rawset(_state, -3);
@@ -123,7 +131,7 @@ void ExecutorImpl::pushParamsToLua(ScriptParameters const& parameters) noexcept
 	}
 	lua_setglobal(_state, "argv");
 
-	lua_pushinteger(_state, parameters.size());
+	lua_pushinteger(_state, 1 + parameters.size());
 	lua_setglobal(_state, "argc");
 }
 

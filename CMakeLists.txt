@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 3.13)
 # It should have 3 digits (x.y.z) on main branch, and 4 digits (x.y.z.w) on dev and task branches. The last digit being used as beta label.
 # As soon as an API change occurs in dev or task branch, update the version number by following SemVer rules (so the API breaking changes are not lost/forgotten).
 # Example: 1.5.0 is the upcoming release version (main branch) of current 1.5.0.3 devel version (dev/task) which will be labelled 1.5.0-beta3
-set(LUARUNNER_VERSION 1.2.1.2)
+set(LUARUNNER_VERSION 1.2.1.3)
 
 ############ Override from command line "CMake -D<OPTION>=TRUE/FALSE/0/1/ON/OFF"
 
@@ -29,8 +29,8 @@ option(ENABLE_LUARUNNER_SIGNING "Enable binaries signing." FALSE)
 
 project(LuaRunner)
 
-# Using c++14 standard for all targets
-set(CMAKE_CXX_STANDARD 14)
+# Using c++17 standard for all targets
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 # Set minimum OSX version
@@ -45,17 +45,13 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 # Include our internal macros
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/internals.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/internals.cmake)
 
 ############ Define some variables
 
 set(TARGET_ARCH 32)
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 	set(TARGET_ARCH 64)
-endif()
-set(VS_USE_CLANG FALSE)
-if(MSVC AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-	set(VS_USE_CLANG TRUE)
 endif()
 
 ############ Add projects

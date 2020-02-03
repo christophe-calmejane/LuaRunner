@@ -54,7 +54,7 @@ if(INSTALL_LUARUNNER_LIBS)
 	lr_setup_library_install_rules(luaRunner_static)
 endif()
 if(INSTALL_LUARUNNER_HEADERS)
-	install(FILES ${HEADER_FILES_PUBLIC} DESTINATION include/luaRunner)
+	install(DIRECTORY ${LUARUNNER_ROOT_FOLDER}/include/luaRunner CONFIGURATIONS Release DESTINATION include FILES_MATCHING PATTERN "*.hpp")
 endif()
 
 set(SOURCE_FILES_BINARY
@@ -63,14 +63,18 @@ set(SOURCE_FILES_BINARY
 
 # Binary target
 if(BUILD_LUARUNNER_EXECUTABLE)
-	add_executable(LuaRunner ${SOURCE_FILES_BINARY})
+	add_executable(${PROJECT_NAME} ${SOURCE_FILES_BINARY})
 	# Setup common options
-	lr_setup_executable_options(LuaRunner)
+	lr_setup_executable_options(${PROJECT_NAME})
 	# Additional link libraries
-	target_link_libraries(LuaRunner luaRunner_static)
+	target_link_libraries(${PROJECT_NAME} luaRunner_static)
+	# Sign binary (this is done during installation phase, either from this project or from a project including this one)
+	#if(ENABLE_LUARUNNER_SIGNING)
+		#lr_sign_target(${PROJECT_NAME}) # TODO LATER
+	#endif()
 	# Setup install rules
 	if(INSTALL_LUARUNNER_EXECUTABLE)
-		install(TARGETS LuaRunner RUNTIME DESTINATION bin)
+		install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 	endif()
 
 	# Copy liblua to output folder as post-build (for easy test/debug)
@@ -81,11 +85,11 @@ if(BUILD_LUARUNNER_EXECUTABLE)
 	endif()
 
 	add_custom_command(
-		TARGET LuaRunner
+		TARGET ${PROJECT_NAME}
 		POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}${addSubDestPath}"
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:liblua> "${CMAKE_CURRENT_BINARY_DIR}${addSubDestPath}"
-		COMMENT "Copying liblua to LuaRunner output folder for easy debug"
+		COMMENT "Copying liblua to ${PROJECT_NAME} output folder for easy debug"
 		VERBATIM
 	)
 endif()
@@ -97,4 +101,13 @@ target_include_directories(luaRunnerPlugin_interface INTERFACE $<INSTALL_INTERFA
 # Setup install rules
 if(INSTALL_LUARUNNER_LIBS)
 	lr_setup_library_install_rules(luaRunnerPlugin_interface)
+endif()
+
+# StlLuaUtils interface target
+add_library(stlLuaUtils_interface INTERFACE)
+# Additional include directories
+target_include_directories(stlLuaUtils_interface INTERFACE $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${LUARUNNER_ROOT_FOLDER}/include>)
+# Setup install rules
+if(INSTALL_LUARUNNER_LIBS)
+	lr_setup_library_install_rules(stlLuaUtils_interface)
 endif()
