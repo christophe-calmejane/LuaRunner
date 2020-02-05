@@ -29,8 +29,17 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <array>
 #include <optional>
 
+#ifndef LUARUNNER_UTILS_CALL_CONVENTION
+#	error "LUARUNNER_UTILS_CALL_CONVENTION must be defined before including this file"
+#endif // !LUARUNNER_UTILS_CALL_CONVENTION
+
+namespace luaRunner
+{
+namespace utils
+{
 #define LUA_ENUM(L, name, val) \
 	lua_pushlstring(L, #name, sizeof(#name) - 1); \
 	lua_pushinteger(L, static_cast<lua_Integer>(val)); \
@@ -300,6 +309,22 @@ constexpr std::enable_if_t<std::is_base_of_v<std::map<typename ValueType::key_ty
 	return 1; // Return one pushed variable on the lua stack
 }
 
+// std::array<integral, size> overload
+template<typename ValueType, typename = std::enable_if_t<std::is_integral_v<typename ValueType::value_type>>>
+constexpr std::enable_if_t<std::is_base_of_v<std::array<typename ValueType::value_type, std::tuple_size<std::decay_t<ValueType>>::value>, std::decay_t<ValueType>>, int> pushValueToStack(lua_State* luaState, ValueType const& values)
+{
+	lua_newtable(luaState); // Push a new table on the stack
+
+	for (auto idx = 0u; idx < values.size(); ++idx)
+	{
+		lua_pushinteger(luaState, idx + 1); // Push key index
+		lua_pushinteger(luaState, values[idx]); // Push value
+		lua_rawset(luaState, -3); // Store the key-value pair in the table
+	}
+
+	return 1; // Return one pushed variable on the lua stack
+}
+
 // bool specialization
 template<>
 inline int pushValueToStack<bool>(lua_State* luaState, bool const value)
@@ -324,6 +349,7 @@ constexpr std::enable_if_t<std::is_enum<ValueType>::value, int> pushValueToStack
 	return 1;
 }
 
+
 /* ************************************************************ */
 /* pushTableElement template:                                   */
 /* Push value to a table (must be on the stack already)         */
@@ -336,3 +362,113 @@ inline void pushTableElement(lua_State* luaState, char const* const elementName,
 	pushValueToStack<ValueType>(luaState, value); // Push value
 	lua_rawset(luaState, -3); // Store the key-value pair in the table
 }
+
+
+/* ************************************************************ */
+/* Class setter/getter templates:                               */
+/* Directly maps class simple setter and getter                 */
+/* ************************************************************ */
+#define DO_EXPAND(...) __VA_ARGS__##1
+#define EXPAND(VAL) DO_EXPAND(VAL)
+
+#if EXPAND(LUARUNNER_UTILS_CALL_CONVENTION) != 1 /* LUARUNNER_UTILS_CALL_CONVENTION is defined to something */
+// Class setter
+template<typename ObjectType, typename ValueType, void (LUARUNNER_UTILS_CALL_CONVENTION ObjectType::*Setter)(ValueType) noexcept>
+constexpr int classSetter(lua_State* luaState)
+{
+	ObjectType* const obj = luaW_check<ObjectType>(luaState, 1);
+	if (obj != nullptr)
+	{
+		(obj->*Setter)(getAndValidateType<ValueType>(luaState, 2));
+	}
+	return 0;
+}
+
+// Parent class setter
+template<typename ObjectType, typename ValueType, typename ObjectParentType, void (LUARUNNER_UTILS_CALL_CONVENTION ObjectParentType::*Setter)(ValueType) noexcept>
+constexpr int parentClassSetter(lua_State* luaState)
+{
+	auto* const obj = static_cast<ObjectParentType*>(luaW_check<ObjectType>(luaState, 1));
+	if (obj != nullptr)
+	{
+		(obj->*Setter)(getAndValidateType<ValueType>(luaState, 2));
+	}
+	return 0;
+}
+
+// Class getter
+template<typename ObjectType, typename ValueType, ValueType (LUARUNNER_UTILS_CALL_CONVENTION ObjectType::*Getter)() const>
+constexpr int classGetter(lua_State* luaState)
+{
+	ObjectType const* const obj = luaW_check<ObjectType>(luaState, 1);
+	if (obj != nullptr)
+	{
+		return pushValueToStack(luaState, (obj->*Getter)());
+	}
+	return 0;
+}
+
+// Parent class getter
+template<typename ObjectType, typename ValueType, typename ObjectParentType, ValueType (LUARUNNER_UTILS_CALL_CONVENTION ObjectParentType::*Getter)() const>
+constexpr int parentClassGetter(lua_State* luaState)
+{
+	auto const* const obj = static_cast<ObjectParentType*>(luaW_check<ObjectType>(luaState, 1));
+	if (obj != nullptr)
+	{
+		return pushValueToStack(luaState, (obj->*Getter)());
+	}
+	return 0;
+}
+#endif // LUARUNNER_UTILS_CALL_CONVENTION is defined to something
+
+// Class setter
+template<typename ObjectType, typename ValueType, void (ObjectType::*Setter)(ValueType) noexcept>
+constexpr int classSetter(lua_State* luaState)
+{
+	ObjectType* const obj = luaW_check<ObjectType>(luaState, 1);
+	if (obj != nullptr)
+	{
+		(obj->*Setter)(getAndValidateType<ValueType>(luaState, 2));
+	}
+	return 0;
+}
+
+// Parent class setter
+template<typename ObjectType, typename ValueType, typename ObjectParentType, void (ObjectParentType::*Setter)(ValueType) noexcept>
+constexpr int parentClassSetter(lua_State* luaState)
+{
+	auto* const obj = static_cast<ObjectParentType*>(luaW_check<ObjectType>(luaState, 1));
+	if (obj != nullptr)
+	{
+		(obj->*Setter)(getAndValidateType<ValueType>(luaState, 2));
+	}
+	return 0;
+}
+
+// Class getter
+template<typename ObjectType, typename ValueType, ValueType (ObjectType::*Getter)() const>
+constexpr int classGetter(lua_State* luaState)
+{
+	ObjectType const* const obj = luaW_check<ObjectType>(luaState, 1);
+	if (obj != nullptr)
+	{
+		return pushValueToStack(luaState, (obj->*Getter)());
+	}
+	return 0;
+}
+
+// Parent class getter
+template<typename ObjectType, typename ValueType, typename ObjectParentType, ValueType (ObjectParentType::*Getter)() const>
+constexpr int parentClassGetter(lua_State* luaState)
+{
+	auto const* const obj = static_cast<ObjectParentType*>(luaW_check<ObjectType>(luaState, 1));
+	if (obj != nullptr)
+	{
+		return pushValueToStack(luaState, (obj->*Getter)());
+	}
+	return 0;
+}
+
+
+} // namespace utils
+} // namespace luaRunner
