@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Useful script to generate project files using cmake
 
 cmake_opt=""
