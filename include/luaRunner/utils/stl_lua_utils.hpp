@@ -204,7 +204,7 @@ constexpr std::enable_if_t<std::is_base_of_v<std::map<typename ValueType::key_ty
 			luaL_argerror(luaState, keyIndex, msg);
 			return result;
 		}
-		auto const key = static_cast<ValueType::key_type>(lua_tointeger(luaState, keyIndex));
+		auto const key = static_cast<typename ValueType::key_type>(lua_tointeger(luaState, keyIndex));
 		result[key] = getAndValidateType<ValueType::mapped_type>(luaState, valueIndex);
 		lua_pop(luaState, 1); // Remove 'value' from the stack but keep 'key' for next iteration
 	}
@@ -362,113 +362,6 @@ inline void pushTableElement(lua_State* luaState, char const* const elementName,
 	pushValueToStack<ValueType>(luaState, value); // Push value
 	lua_rawset(luaState, -3); // Store the key-value pair in the table
 }
-
-
-/* ************************************************************ */
-/* Class setter/getter templates:                               */
-/* Directly maps class simple setter and getter                 */
-/* ************************************************************ */
-#define DO_EXPAND(...) __VA_ARGS__##1
-#define EXPAND(VAL) DO_EXPAND(VAL)
-
-#if EXPAND(LUARUNNER_UTILS_CALL_CONVENTION) != 1 /* LUARUNNER_UTILS_CALL_CONVENTION is defined to something */
-// Class setter
-template<typename ObjectType, typename ValueType, void (LUARUNNER_UTILS_CALL_CONVENTION ObjectType::*Setter)(ValueType) noexcept>
-constexpr int classSetter(lua_State* luaState)
-{
-	ObjectType* const obj = luaW_check<ObjectType>(luaState, 1);
-	if (obj != nullptr)
-	{
-		(obj->*Setter)(getAndValidateType<ValueType>(luaState, 2));
-	}
-	return 0;
-}
-
-// Parent class setter
-template<typename ObjectType, typename ValueType, typename ObjectParentType, void (LUARUNNER_UTILS_CALL_CONVENTION ObjectParentType::*Setter)(ValueType) noexcept>
-constexpr int parentClassSetter(lua_State* luaState)
-{
-	auto* const obj = static_cast<ObjectParentType*>(luaW_check<ObjectType>(luaState, 1));
-	if (obj != nullptr)
-	{
-		(obj->*Setter)(getAndValidateType<ValueType>(luaState, 2));
-	}
-	return 0;
-}
-
-// Class getter
-template<typename ObjectType, typename ValueType, ValueType (LUARUNNER_UTILS_CALL_CONVENTION ObjectType::*Getter)() const>
-constexpr int classGetter(lua_State* luaState)
-{
-	ObjectType const* const obj = luaW_check<ObjectType>(luaState, 1);
-	if (obj != nullptr)
-	{
-		return pushValueToStack(luaState, (obj->*Getter)());
-	}
-	return 0;
-}
-
-// Parent class getter
-template<typename ObjectType, typename ValueType, typename ObjectParentType, ValueType (LUARUNNER_UTILS_CALL_CONVENTION ObjectParentType::*Getter)() const>
-constexpr int parentClassGetter(lua_State* luaState)
-{
-	auto const* const obj = static_cast<ObjectParentType*>(luaW_check<ObjectType>(luaState, 1));
-	if (obj != nullptr)
-	{
-		return pushValueToStack(luaState, (obj->*Getter)());
-	}
-	return 0;
-}
-#endif // LUARUNNER_UTILS_CALL_CONVENTION is defined to something
-
-// Class setter
-template<typename ObjectType, typename ValueType, void (ObjectType::*Setter)(ValueType) noexcept>
-constexpr int classSetter(lua_State* luaState)
-{
-	ObjectType* const obj = luaW_check<ObjectType>(luaState, 1);
-	if (obj != nullptr)
-	{
-		(obj->*Setter)(getAndValidateType<ValueType>(luaState, 2));
-	}
-	return 0;
-}
-
-// Parent class setter
-template<typename ObjectType, typename ValueType, typename ObjectParentType, void (ObjectParentType::*Setter)(ValueType) noexcept>
-constexpr int parentClassSetter(lua_State* luaState)
-{
-	auto* const obj = static_cast<ObjectParentType*>(luaW_check<ObjectType>(luaState, 1));
-	if (obj != nullptr)
-	{
-		(obj->*Setter)(getAndValidateType<ValueType>(luaState, 2));
-	}
-	return 0;
-}
-
-// Class getter
-template<typename ObjectType, typename ValueType, ValueType (ObjectType::*Getter)() const>
-constexpr int classGetter(lua_State* luaState)
-{
-	ObjectType const* const obj = luaW_check<ObjectType>(luaState, 1);
-	if (obj != nullptr)
-	{
-		return pushValueToStack(luaState, (obj->*Getter)());
-	}
-	return 0;
-}
-
-// Parent class getter
-template<typename ObjectType, typename ValueType, typename ObjectParentType, ValueType (ObjectParentType::*Getter)() const>
-constexpr int parentClassGetter(lua_State* luaState)
-{
-	auto const* const obj = static_cast<ObjectParentType*>(luaW_check<ObjectType>(luaState, 1));
-	if (obj != nullptr)
-	{
-		return pushValueToStack(luaState, (obj->*Getter)());
-	}
-	return 0;
-}
-
 
 } // namespace utils
 } // namespace luaRunner
