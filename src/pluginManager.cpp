@@ -42,7 +42,7 @@ namespace luaRunner
 {
 namespace plugin
 {
-constexpr auto InitPluginEntryPointName = "InitPlugin";
+constexpr auto DefaultInitPluginEntryPointName = "InitPlugin";
 constexpr auto UninitPluginEntryPointName = "UninitPlugin";
 
 class ManagerImpl final : public Manager
@@ -119,27 +119,31 @@ Manager::LoadResult ManagerImpl::loadPlugin(std::string const& pluginName) noexc
 	if (pluginName.substr(0, 3) == "lib")
 		return { false, "Plugin's name should not start with 'lib'. Do not specify plugin file prefix, only its name." };
 
+	// Get optional entry point
+	auto entryPointName = std::string{ DefaultInitPluginEntryPointName };
+	auto pluginBaseName = pluginName;
+	if (auto const pos = pluginName.find(':'); pos != pluginName.npos)
+	{
+		pluginBaseName = pluginName.substr(0u, pos);
+		entryPointName = pluginName.substr(pos + 1);
+	}
+
 	// Try to load plugin using all search paths
-	auto const name = LUARUNNER_PLUGIN_PREFIX + pluginName + LUARUNNER_PLUGIN_SUFFIX;
+	auto const name = LUARUNNER_PLUGIN_PREFIX + pluginBaseName + LUARUNNER_PLUGIN_SUFFIX;
 	DL_HANDLE handle{ nullptr };
 	for (auto const& path : _searchPaths)
 	{
 		handle = DL_OPEN((path + name).c_str());
 		if (handle != nullptr)
 		{
-			// Check entry points
-			InitPluginFunc initFunc = reinterpret_cast<InitPluginFunc>(DL_SYM(handle, InitPluginEntryPointName));
+			// Check entry point
+			InitPluginFunc initFunc = reinterpret_cast<InitPluginFunc>(DL_SYM(handle, entryPointName.c_str()));
 			if (initFunc == nullptr)
 			{
-				return { false, "InitPlugin entry point not found." };
-			}
-			UninitPluginFunc uninitFunc = reinterpret_cast<UninitPluginFunc>(DL_SYM(handle, UninitPluginEntryPointName));
-			if (uninitFunc == nullptr)
-			{
-				return { false, "UninitPlugin entry point not found." };
+				return { false, "Entry point not found: " + entryPointName };
 			}
 
-			// Call InitPlugin entry point
+			// Call entry point
 			if (!initFunc(_state))
 			{
 				return { false, "InitPlugin entry point returned an error." };
@@ -148,7 +152,7 @@ Manager::LoadResult ManagerImpl::loadPlugin(std::string const& pluginName) noexc
 		}
 	}
 
-	return { false, "Plugin '" + pluginName + "' not found in specified search paths (" + name + ")." };
+	return { false, "Plugin '" + pluginBaseName + "' not found in specified search paths (" + name + ")." };
 }
 
 void ManagerImpl::unloadAllPlugins() noexcept
@@ -156,7 +160,12 @@ void ManagerImpl::unloadAllPlugins() noexcept
 	for (auto const handle : _loadedPlugins)
 	{
 		UninitPluginFunc uninitFunc = reinterpret_cast<UninitPluginFunc>(DL_SYM(handle, UninitPluginEntryPointName));
-		uninitFunc(_state);
+
+		if (uninitFunc != nullptr)
+		{
+			uninitFunc(_state);
+		}
+
 		DL_CLOSE(handle);
 	}
 	_loadedPlugins.clear();

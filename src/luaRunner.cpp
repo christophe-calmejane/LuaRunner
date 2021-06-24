@@ -31,7 +31,7 @@ void printHelp()
 	std::cout << "Options:" << std::endl;
 	std::cout << "  -h -> Display this help and exit" << std::endl;
 	std::cout << "  -v -> Display version and exit" << std::endl;
-	std::cout << "  -p <Name of plugin to load> -> Load specified plugin before executing the lua script. Multiple '-p' options can be specified to load multiple plugins." << std::endl;
+	std::cout << "  -p <Name of plugin to load[:entry point]> -> Load specified plugin before executing the lua script. Multiple '-p' options can be specified to load multiple plugins. You can optionally provide the entry point, or InitPlugin will be used." << std::endl;
 	std::cout << "  -s <Plugins search path> -> Search path for plugins. Multiple '-s' options can be specified to add multiple search paths." << std::endl;
 	std::cout << "Returned value:" << std::endl;
 	std::cout << "  255: Parameter error" << std::endl;
